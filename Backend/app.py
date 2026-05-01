@@ -27,7 +27,25 @@ def create_app() -> Flask:
 
 
 def _register_blueprints(app: Flask) -> None:
-    pass
+    from api.nodes import nodes_bp
+    from api.relationships import rels_bp
+    from api.users import users_bp
+    from api.posts import posts_bp
+    from api.comments import comments_bp
+    from api.hashtags import hashtags_bp
+    from api.groups import groups_bp
+    from api.messages import messages_bp
+    from api.media import media_bp
+    from api.notifications import notifications_bp
+    from api.ingest import ingest_bp
+
+    for bp in (
+        nodes_bp, rels_bp,
+        users_bp, posts_bp, comments_bp, hashtags_bp,
+        groups_bp, messages_bp, media_bp, notifications_bp,
+        ingest_bp,
+    ):
+        app.register_blueprint(bp)
 
 
 def _register_health(app: Flask) -> None:
