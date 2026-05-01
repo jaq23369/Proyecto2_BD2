@@ -71,29 +71,33 @@ Dejar el esqueleto del backend funcionando: Flask arranca, conecta a AuraDB, los
 
 > **Quien cierra la fase llena esta sección antes de notificar al equipo.**
 
-- **Cerrada por:** _____________
-- **Fecha/hora:** _____________
-- **Commit:** `_____________` (hash)
+- **Cerrada por:** Luis Gonzalez
+- **Fecha/hora:** 2026-04-30 ~18:50
+- **Commit:** `12f9cf6` (hash)
 - **Tag:** `fase-1-ok`
 
 **Qué se hizo (resumen 3-5 bullets):**
-- 
-- 
-- 
+- Estructura `Backend/` completa: `db/`, `api/`, `services/`, `schemas/`, `utils/`, `seed/`, `tests/`
+- `db/neo4j_client.py` con singleton driver conectado a AuraDB Free, helpers `run_read`/`run_write`, cierre automático con `atexit`
+- `db/schema.py` con whitelist completa de labels, tipos de relación y propiedades derivada literalmente del diseño; `utils/cypher_builder.py` que valida contra esa whitelist antes de cualquier interpolación en Cypher
+- `app.py` con `create_app()`, CORS, `/api/health` verificado en vivo contra AuraDB (responde `{"ok":true,"data":{"neo4j":"up"}}`), y comando `flask init-db` que ejecuta los 10 statements de `constraints.cypher`
+- `seed/generate_csvs.py` genera 6720 nodos en 24 CSVs (8 nodos + 16 relaciones) con Faker; valida grafo conexo con networkx (`is_connected = True`) en ~1 segundo
 
 **Qué quedó fuera de alcance (si aplica):**
-- 
+- Los CSVs están en `seed/data/` (gitignore); la carga a AuraDB es tarea de Fase 2 (Joel)
 
-**Cambios respecto al plan original:** (cualquier desviación de [Plan_backed.md](../Diseño/Plan_backed.md))
-- 
+**Cambios respecto al plan original:**
+- El plan original decía `NEO4J_USER` en el `.env`; AuraDB usa `NEO4J_USERNAME` — se corrigió en `config.py` y `.env.example`
+- El plan hablaba de 16 CSVs de relaciones con `about_post` y `about_comment` separados; se unificaron en `about.csv` con columna `targetType` para mantener el total en 16 y simplificar la carga
 
 **Decisiones tomadas sobre la marcha:**
-- 
+- Se usó `pydantic-settings` para cargar `.env` con validación de tipos en `config.py` (más robusto que `python-dotenv` directo)
+- El singleton del driver no se inicializa al importar sino al primer uso (lazy init), evitando errores si el `.env` no existe en tiempo de tests
 
 **Métricas:**
-- Nodos generados en CSVs: _____
-- Tiempo de `generate_csvs.py`: _____
-- `is_connected`: _____
+- Nodos generados en CSVs: **6720** (User=1200, Post=1800, Comment=1400, Hashtag=200, Group=120, Message=500, Media=300, Notification=1200)
+- Tiempo de `generate_csvs.py`: **~1.0 s**
+- `is_connected`: **True**
 - Endpoints expuestos por ahora: solo `/api/health`
 
 **Cómo verificarlo localmente:** (comandos exactos para que los revisores reproduzcan)
@@ -101,15 +105,15 @@ Dejar el esqueleto del backend funcionando: Flask arranca, conecta a AuraDB, los
 cd Backend
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env  # luego pegar credenciales reales
-flask init-db
-flask run &
-curl http://localhost:5000/api/health
-python seed/generate_csvs.py
+# pegar credenciales reales en .env (pedir a Luis)
+FLASK_APP=app.py flask init-db          # debe imprimir: constraints created
+FLASK_APP=app.py flask run &
+curl http://localhost:5000/api/health   # {"ok":true,"data":{"neo4j":"up"}}
+python seed/generate_csvs.py            # última línea: is_connected = True
 ```
 
 **Bloqueos / dudas pendientes:**
-- 
+- Ninguno. AuraDB Free conectada y funcional.
 
 ### Revisión Fase 1
 
