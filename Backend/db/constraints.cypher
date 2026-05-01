@@ -1,0 +1,10 @@
+CREATE CONSTRAINT user_id_unique IF NOT EXISTS FOR (n:User) REQUIRE n.userId IS UNIQUE;
+CREATE CONSTRAINT post_id_unique IF NOT EXISTS FOR (n:Post) REQUIRE n.postId IS UNIQUE;
+CREATE CONSTRAINT comment_id_unique IF NOT EXISTS FOR (n:Comment) REQUIRE n.commentId IS UNIQUE;
+CREATE CONSTRAINT hashtag_name_unique IF NOT EXISTS FOR (n:Hashtag) REQUIRE n.name IS UNIQUE;
+CREATE CONSTRAINT group_id_unique IF NOT EXISTS FOR (n:Group) REQUIRE n.groupId IS UNIQUE;
+CREATE CONSTRAINT message_id_unique IF NOT EXISTS FOR (n:Message) REQUIRE n.messageId IS UNIQUE;
+CREATE CONSTRAINT media_id_unique IF NOT EXISTS FOR (n:Media) REQUIRE n.mediaId IS UNIQUE;
+CREATE CONSTRAINT notification_id_unique IF NOT EXISTS FOR (n:Notification) REQUIRE n.notificationId IS UNIQUE;
+CREATE INDEX user_username_idx IF NOT EXISTS FOR (n:User) ON (n.username);
+CREATE INDEX post_created_at_idx IF NOT EXISTS FOR (n:Post) ON (n.createdAt);
