@@ -1,0 +1,164 @@
+{
+  "info": {
+    "name": "Proyecto 2 Neo4j - Demo Rubrica",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000" },
+    { "key": "relId", "value": "REEMPLAZAR_ELEMENT_ID" }
+  ],
+  "item": [
+    {
+      "name": "Demo",
+      "item": [
+        {
+          "name": "Health",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/health" }
+        },
+        {
+          "name": "Carga CSV - Seed",
+          "request": { "method": "POST", "url": "{{baseUrl}}/api/ingest/seed" }
+        },
+        {
+          "name": "Estado Seed 5000+ Nodos",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/ingest/status" }
+        },
+        {
+          "name": "Crear Nodo 1 Label",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/nodes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"labels\":[\"Hashtag\"],\"properties\":{\"name\":\"demo_phase3\",\"postsCount\":0,\"followersCount\":0,\"isTrending\":false,\"relatedTopics\":[\"neo4j\"],\"createdAt\":\"2026-05-05\"}}"
+            }
+          }
+        },
+        {
+          "name": "Crear Nodo 5+ Propiedades",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/nodes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"labels\":[\"User\"],\"properties\":{\"userId\":\"demo-user-phase3\",\"username\":\"demo_phase3\",\"email\":\"demo_phase3@example.com\",\"bio\":\"demo\",\"profilePicUrl\":\"\",\"isVerified\":true,\"followersCount\":0,\"followingCount\":0,\"interests\":[\"neo4j\"],\"birthDate\":\"2000-01-01\",\"createdAt\":\"2026-05-05\"}}"
+            }
+          }
+        },
+        {
+          "name": "Visualizar 1 Nodo",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/nodes/User/u_1" }
+        },
+        {
+          "name": "Visualizar Muchos Nodos",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/nodes?label=Post&limit=10" }
+        },
+        {
+          "name": "Agregacion Nodos",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/nodes/aggregate?label=Post&groupBy=isPublic" }
+        },
+        {
+          "name": "Actualizar Props Nodo",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/nodes/User/u_1/properties",
+            "body": { "mode": "raw", "raw": "{\"properties\":{\"bio\":\"Actualizado en demo\"}}" }
+          }
+        },
+        {
+          "name": "Actualizar Props Nodos Bulk",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/nodes/properties/bulk",
+            "body": { "mode": "raw", "raw": "{\"items\":[{\"id\":\"u_1\",\"label\":\"User\",\"properties\":{\"bio\":\"bulk 1\"}},{\"id\":\"u_2\",\"label\":\"User\",\"properties\":{\"bio\":\"bulk 2\"}}]}" }
+          }
+        },
+        {
+          "name": "Crear Relacion 3+ Props",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/relationships",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"from_label\":\"User\",\"from_id\":\"u_1\",\"to_label\":\"User\",\"to_id\":\"u_2\",\"type\":\"FOLLOWS\",\"properties\":{\"since\":\"2026-05-05\",\"notificationsEnabled\":true,\"mutualFriendsCount\":3}}"
+            }
+          }
+        },
+        {
+          "name": "Actualizar Props Relacion",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/relationships/{{relId}}/properties",
+            "body": { "mode": "raw", "raw": "{\"properties\":{\"notificationsEnabled\":false}}" }
+          }
+        },
+        {
+          "name": "Eliminar Props Relacion",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/relationships/{{relId}}/properties",
+            "body": { "mode": "raw", "raw": "{\"keys\":[\"notificationsEnabled\"]}" }
+          }
+        },
+        {
+          "name": "Consulta Joel - Top Influencers",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/queries/top-influencers?limit=10" }
+        },
+        {
+          "name": "Consulta Joel - Trending Hashtags",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/queries/trending-hashtags?days=90&limit=10" }
+        },
+        {
+          "name": "Consulta Nery - Most Liked Posts",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/queries/most-liked-posts?limit=10" }
+        },
+        {
+          "name": "Consulta Nery - Largest Groups",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/queries/largest-groups?limit=10" }
+        },
+        {
+          "name": "Consulta Luis - Negative Comments",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/queries/negative-comments?limit=10" }
+        },
+        {
+          "name": "Consulta Luis - Most Active Users",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/queries/most-active-users?limit=10" }
+        },
+        {
+          "name": "GDS PageRank Extra",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/gds/pagerank",
+            "body": { "mode": "raw", "raw": "{\"topN\":20}" }
+          }
+        },
+        {
+          "name": "GDS Node Similarity Extra",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/gds/node-similarity",
+            "body": { "mode": "raw", "raw": "{\"userId\":\"u_1\",\"topK\":10}" }
+          }
+        },
+        {
+          "name": "GDS Communities Extra",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/gds/communities",
+            "body": { "mode": "raw", "raw": "{\"topN\":20}" }
+          }
+        }
+      ]
+    }
+  ]
+}

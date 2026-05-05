@@ -1,10 +1,10 @@
 from db.neo4j_client import run_read, run_write
-from db.schema import ID_PROPERTY
+from db.schema import ID_PROPERTY, LABEL_PROPERTIES
 from utils.cypher_builder import (
     validate_label, validate_node_props,
     build_labels_str, build_remove_clause,
 )
-from utils.errors import NotFoundError, Neo4jServiceError
+from utils.errors import NotFoundError, Neo4jServiceError, InvalidLabelError
 
 
 def _id_prop(label: str) -> str:
@@ -37,6 +37,7 @@ def get_nodes(label: str, skip: int = 0, limit: int = 20, filters: dict | None =
     params: dict = {"skip": skip, "limit": limit}
     where_parts = []
     if filters:
+        validate_node_props(label, filters)
         for k, v in filters.items():
             params[f"f_{k}"] = v
             where_parts.append(f"n.{k} = $f_{k}")
@@ -47,6 +48,8 @@ def get_nodes(label: str, skip: int = 0, limit: int = 20, filters: dict | None =
 
 def aggregate_nodes(label: str, group_by: str) -> list[dict]:
     validate_label(label)
+    if group_by not in LABEL_PROPERTIES[label]:
+        raise InvalidLabelError(f"Property '{group_by}' is not allowed on {label}")
     cypher = (
         f"MATCH (n:{label}) "
         f"RETURN n.{group_by} AS value, count(*) AS count "
@@ -82,6 +85,7 @@ def bulk_update_node_props(items: list[dict]) -> list[dict]:
 
 def delete_node_props(label: str, node_id: str, keys: list[str]) -> dict:
     validate_label(label)
+    validate_node_props(label, {key: None for key in keys})
     id_prop = _id_prop(label)
     remove_clause = build_remove_clause(keys)
     cypher = f"MATCH (n:{label} {{{id_prop}: $id}}) {remove_clause} RETURN n"
@@ -96,6 +100,7 @@ def bulk_delete_node_props(items: list[dict]) -> list[dict]:
     for item in items:
         label = item["label"]
         validate_label(label)
+        validate_node_props(label, {key: None for key in item["keys"]})
         id_prop = _id_prop(label)
         remove_clause = build_remove_clause(item["keys"])
         cypher = f"MATCH (n:{label} {{{id_prop}: $id}}) {remove_clause} RETURN n"

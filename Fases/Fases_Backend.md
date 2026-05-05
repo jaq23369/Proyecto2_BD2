@@ -288,28 +288,28 @@ Cerrar los puntos de rúbrica restantes (consultas demo, GDS extra, tests, docum
 ### Tareas
 
 **Joel — consultas + Postman**
-- [ ] [Backend/api/queries.py](../Backend/api/queries.py) con las 6 queries del [Plan_backed.md:140-146](../Diseño/Plan_backed.md#L140-L146):
+- [x] [Backend/api/queries.py](../Backend/api/queries.py) con las 6 queries del [Plan_backed.md:140-146](../Diseño/Plan_backed.md#L140-L146):
   - `GET /api/queries/top-influencers` (Joel)
   - `GET /api/queries/trending-hashtags` (Joel)
   - `GET /api/queries/most-liked-posts` (Nery)
   - `GET /api/queries/largest-groups` (Nery)
   - `GET /api/queries/negative-comments` (Luis)
   - `GET /api/queries/most-active-users` (Luis)
-- [ ] [Backend/tests/postman_collection.json](../Backend/tests/postman_collection.json) **organizada por punto de rúbrica** (carpetas con el nombre del criterio)
+- [x] [Backend/tests/postman_collection.json](../Backend/tests/postman_collection.json) **organizada por punto de rúbrica** (carpetas con el nombre del criterio)
 
 **Nery — GDS en sandbox**
 - [ ] Levantar **Neo4j Sandbox local** con plugin GDS instalado
 - [ ] Cargar dump/seed al sandbox
-- [ ] [Backend/services/gds_service.py](../Backend/services/gds_service.py) con patrón `drop + project + stream`
-- [ ] [Backend/api/gds.py](../Backend/api/gds.py) con los 4 endpoints del [Plan_backed.md:150-154](../Diseño/Plan_backed.md#L150-L154)
-- [ ] Probar `pageRank`, `nodeSimilarity`, `louvain` y devolver top-N
+- [x] [Backend/services/gds_service.py](../Backend/services/gds_service.py) con patrón `drop + project + stream`
+- [x] [Backend/api/gds.py](../Backend/api/gds.py) con los 4 endpoints del [Plan_backed.md:150-154](../Diseño/Plan_backed.md#L150-L154)
+- [ ] Probar `pageRank`, `nodeSimilarity`, `louvain` y devolver top-N en sandbox real
 
 **Luis — tests + docs + entregables**
-- [ ] [Backend/tests/conftest.py](../Backend/tests/conftest.py) con fixture de app y cliente Flask
-- [ ] [Backend/tests/test_nodes.py](../Backend/tests/test_nodes.py) cubriendo cada endpoint genérico
-- [ ] [Backend/tests/test_relationships.py](../Backend/tests/test_relationships.py)
-- [ ] [Backend/tests/test_queries.py](../Backend/tests/test_queries.py) — 1 test por consulta demo
-- [ ] [Backend/README.md](../Backend/README.md) — instalación, `.env`, `init-db`, seed, run, tests, mapa rúbrica→endpoint
+- [x] [Backend/tests/conftest.py](../Backend/tests/conftest.py) con fixture de app y cliente Flask
+- [x] [Backend/tests/test_nodes.py](../Backend/tests/test_nodes.py) cubriendo cada endpoint genérico
+- [x] [Backend/tests/test_relationships.py](../Backend/tests/test_relationships.py)
+- [x] [Backend/tests/test_queries.py](../Backend/tests/test_queries.py) — 1 test por consulta demo
+- [x] [Backend/README.md](../Backend/README.md) — instalación, `.env`, `init-db`, seed, run, tests, mapa rúbrica→endpoint
 - [ ] **Documento PDF** reusando [Diseño/Proyecto2neo02.md](../Diseño/Proyecto2neo02.md) + capturas
 - [ ] **Video ≤10 min** demostrando cada punto de rúbrica en orden
 
@@ -326,58 +326,66 @@ Cerrar los puntos de rúbrica restantes (consultas demo, GDS extra, tests, docum
 ### Reporte de cierre — Fase 3
 
 - **Cerrada por:** Nery (consolida)
-- **Fecha/hora:** _____________
-- **Commit:** `_____________`
+- **Fecha/hora:** 2026-05-05
+- **Commit:** `pendiente`
 - **Tag:** `fase-3-ok`
 
 **Cobertura final de rúbrica (autoevaluación):**
 
 | Punto rúbrica | Pts máx | Endpoint/artefacto demostrable | Pts auto |
 |---|---|---|---|
-| Crear nodo 1 label | 5 | | |
-| Crear nodo 2+ labels | 5 | | |
-| Crear nodo 5+ props | 5 | | |
-| Visualizar 1/muchos/agregado | 5 | | |
-| Gestión props nodos (add/upd/del + bulk) | 10 | | |
-| Crear rel 3+ props | 5 | | |
-| Gestión props rel (add/upd/del + bulk) | 10 | | |
-| Eliminar 1/muchos nodos | 5 | | |
-| Eliminar 1/muchas rel | 5 | | |
-| 4-6 consultas Cypher | 15 | | |
-| Carga CSV nodos+rel | 5 | | |
-| Datos previos cargados | 2 | | |
-| 5000+ nodos / conexo | 3 | | |
-| GDS (extra) | 10 | | |
-| **Total** | **90 + 10 extra** | | |
+| Crear nodo 1 label | 5 | `POST /api/nodes` con `labels:["Hashtag"]` | 5 |
+| Crear nodo 2+ labels | 5 | `POST /api/nodes` con multiples labels validas | 5 |
+| Crear nodo 5+ props | 5 | `POST /api/nodes` con payload completo de `User`/`Post` | 5 |
+| Visualizar 1/muchos/agregado | 5 | `GET /api/nodes/User/u_1`, `GET /api/nodes?label=Post`, `GET /api/nodes/aggregate` | 5 |
+| Gestión props nodos (add/upd/del + bulk) | 10 | `PATCH/DELETE /api/nodes/.../properties` y `/properties/bulk` | 10 |
+| Crear rel 3+ props | 5 | `POST /api/relationships` con `FOLLOWS` y 3 props | 5 |
+| Gestión props rel (add/upd/del + bulk) | 10 | `PATCH/DELETE /api/relationships/.../properties` y `/properties/bulk` | 10 |
+| Eliminar 1/muchos nodos | 5 | `DELETE /api/nodes/User/u_1`, `DELETE /api/nodes` | 5 |
+| Eliminar 1/muchas rel | 5 | `DELETE /api/relationships/<relId>`, `DELETE /api/relationships` | 5 |
+| 4-6 consultas Cypher | 15 | `GET /api/queries/*` (6 consultas, 2 por integrante) | 15 |
+| Carga CSV nodos+rel | 5 | `POST /api/ingest/seed`, `POST /api/ingest/csv` | 5 |
+| Datos previos cargados | 2 | `GET /api/ingest/status` muestra 6720 nodos segun Fase 2 | 2 |
+| 5000+ nodos / conexo | 3 | Seed de 6720 nodos + validacion `networkx.is_connected=True` segun Fase 1/2 | 3 |
+| GDS (extra) | 10 | `POST /api/gds/pagerank`, `/node-similarity`, `/communities` listos; falta validar en sandbox real | 7 |
+| **Total** | **90 + 10 extra** | Base completa + GDS implementado a falta de sandbox real | **90 + 7 extra** |
 
 **Resultados de tests:**
-- Tests totales: ___
-- Pass: ___ · Fail: ___
-- Cobertura: ___ %
+- Tests totales: 30
+- Pass: 30 · Fail: 0
+- Cobertura: no medida con coverage.py; pruebas HTTP cubren nodos, relaciones, queries, GDS y registro de rutas
 
 **Resultado GDS (sandbox):**
-- PageRank top-20 obtenido: [ ] sí
-- NodeSimilarity probado: [ ] sí
-- Louvain probado: [ ] sí
+- PageRank top-20 obtenido: [ ] sí en sandbox real / [x] endpoint y servicio implementados
+- NodeSimilarity probado: [ ] sí en sandbox real / [x] endpoint y servicio implementados
+- Louvain probado: [ ] sí en sandbox real / [x] endpoint y servicio implementados
 
 **Material de entrega:**
-- README: [ ] · PDF: [ ] · Video: [ ] · Postman: [ ] · Repo limpio: [ ]
+- README: [x] · PDF: [ ] · Video: [ ] · Postman: [x] · Repo limpio: [x] sin archivos generados trackeados (`.venv` y cache ignorados)
 
 **Cambios de último momento:**
-- 
+- Se agrego `api/queries.py` con las 6 consultas demo y se registro el blueprint en `app.py`.
+- Se agrego `services/gds_service.py` + `api/gds.py` con PageRank, Node Similarity, Louvain y drop de grafo GDS.
+- Se agregaron 30 tests con Flask test client y mocks para correr sin AuraDB.
+- Se agrego `Backend/README.md` con instalacion, seed, tests, GDS y mapa rubrica→endpoint.
+- Se agrego `Backend/tests/postman_collection.json` con carpeta "Demo".
+- Se actualizaron dependencias a rangos compatibles con Python 3.14 manteniendo Flask 3, Neo4j 5, Pydantic v2, pandas 2 y pytest.
+- Se reforzo validacion de propiedades dinamicas en `node_service.py` para filtros, agregaciones y removals.
 
 **Bloqueos / problemas en la presentación:**
-- 
+- PDF y video deben generarse manualmente con capturas reales.
+- GDS requiere levantar Neo4j Sandbox/local con plugin Graph Data Science; AuraDB Free no ejecuta GDS.
+- Para demostrar relaciones por `elementId(r)`, copiar el `relId` devuelto por `POST /api/relationships` en la variable `relId` de Postman.
 
 ### Revisión final
 
 | Revisor | Tests pasan localmente | Probó endpoint suyo de demo | Aprueba entrega |
 |---|---|---|---|
 | Joel | [ ] | [ ] | [ ] ✅ |
-| Nery (auto-cierre) | [ ] | [ ] | [ ] ✅ |
+| Nery (auto-cierre) | [x] | [x] | [x] ✅ |
 | Luis | [ ] | [ ] | [ ] ✅ |
 
-**¿Listos para entregar?** [ ] Sí [ ] No, qué falta: _____________
+**¿Listos para entregar?** [ ] Sí [x] No, qué falta: PDF, video y validacion GDS en sandbox real
 
 ---
 
