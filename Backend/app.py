@@ -38,12 +38,14 @@ def _register_blueprints(app: Flask) -> None:
     from api.media import media_bp
     from api.notifications import notifications_bp
     from api.ingest import ingest_bp
+    from api.queries import queries_bp
+    from api.gds import gds_bp
 
     for bp in (
         nodes_bp, rels_bp,
         users_bp, posts_bp, comments_bp, hashtags_bp,
         groups_bp, messages_bp, media_bp, notifications_bp,
-        ingest_bp,
+        ingest_bp, queries_bp, gds_bp,
     ):
         app.register_blueprint(bp)
 
