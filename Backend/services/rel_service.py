@@ -38,6 +38,7 @@ def get_relationships(rel_type: str, skip: int = 0, limit: int = 20, filters: di
     params: dict = {"skip": skip, "limit": limit}
     where_parts = []
     if filters:
+        validate_rel_props(rel_type, filters)
         for k, v in filters.items():
             params[f"f_{k}"] = v
             where_parts.append(f"r.{k} = $f_{k}")
@@ -51,6 +52,8 @@ def get_relationships(rel_type: str, skip: int = 0, limit: int = 20, filters: di
 
 
 def update_rel_props(rel_id: str, properties: dict) -> dict:
+    rel_type = _get_rel_type(rel_id)
+    validate_rel_props(rel_type, properties)
     cypher = (
         "MATCH ()-[r]->() WHERE elementId(r) = $rel_id "
         "SET r += $props "
@@ -67,6 +70,8 @@ def bulk_update_rel_props(items: list[dict]) -> list[dict]:
 
 
 def delete_rel_props(rel_id: str, keys: list[str]) -> dict:
+    rel_type = _get_rel_type(rel_id)
+    validate_rel_props(rel_type, {key: None for key in keys})
     remove_parts = ", ".join(f"r.{k}" for k in keys)
     cypher = (
         f"MATCH ()-[r]->() WHERE elementId(r) = $rel_id "
@@ -93,6 +98,7 @@ def delete_relationships(rel_type: str, filters: dict | None = None) -> int:
     params: dict = {}
     where_parts = []
     if filters:
+        validate_rel_props(rel_type, filters)
         for k, v in filters.items():
             params[f"f_{k}"] = v
             where_parts.append(f"r.{k} = $f_{k}")
@@ -101,3 +107,13 @@ def delete_relationships(rel_type: str, filters: dict | None = None) -> int:
     count = count_rows[0]["cnt"] if count_rows else 0
     run_write(f"MATCH ()-[r:{rel_type}]->() {where} DELETE r", params)
     return count
+
+
+def _get_rel_type(rel_id: str) -> str:
+    rows = run_read(
+        "MATCH ()-[r]->() WHERE elementId(r) = $rel_id RETURN type(r) AS type",
+        {"rel_id": rel_id},
+    )
+    if not rows:
+        raise NotFoundError(f"Relationship '{rel_id}' not found")
+    return rows[0]["type"]
