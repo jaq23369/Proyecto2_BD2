@@ -1,8 +1,19 @@
 import atexit
 from neo4j import GraphDatabase, Driver
+from neo4j.time import Date, DateTime, Time, Duration
 from config import settings
 
 _driver: Driver | None = None
+
+
+def _jsonable(value):
+    if isinstance(value, (Date, DateTime, Time, Duration)):
+        return value.iso_format()
+    if isinstance(value, dict):
+        return {k: _jsonable(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_jsonable(v) for v in value]
+    return value
 
 
 def get_driver() -> Driver:
@@ -38,4 +49,4 @@ def run_write(cypher: str, params: dict | None = None) -> list[dict]:
 
 def _run_tx(tx, cypher: str, params: dict) -> list[dict]:
     result = tx.run(cypher, **params)
-    return [record.data() for record in result]
+    return [_jsonable(record.data()) for record in result]
