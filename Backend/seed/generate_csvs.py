@@ -1,6 +1,6 @@
 """
 Genera 24 CSVs (8 nodos + 16 relaciones) para la Red Social en Neo4j.
-Objetivo: 6720 nodos totales, grafo conexo validado con networkx.
+Objetivo: 6720 nodos totales, grafo conexo validado localmente.
 """
 import csv
 import json
@@ -9,7 +9,6 @@ import random
 import time
 from datetime import date, timedelta
 
-import networkx as nx
 from faker import Faker
 
 random.seed(42)
@@ -580,40 +579,50 @@ def check_connectivity(
     received_edges,
     about_edges,
 ) -> bool:
-    G = nx.Graph()
+    all_nodes = set()
+    all_nodes.update(user_ids, post_ids, comment_ids, group_ids, msg_ids, media_ids, notif_ids)
+    all_nodes.update(h for _, h in tagged_edges)
 
-    # add all node IDs
-    G.add_nodes_from(user_ids)
-    G.add_nodes_from(post_ids)
-    G.add_nodes_from(comment_ids)
-    G.add_nodes_from(group_ids)
-    G.add_nodes_from(msg_ids)
-    G.add_nodes_from(media_ids)
-    G.add_nodes_from(notif_ids)
-    # hashtags added when we encounter tagged_with edges
+    adjacency = {node: set() for node in all_nodes}
 
-    G.add_edges_from(follows_edges)
-    G.add_edges_from(posted_edges)
-    G.add_edges_from(commented_edges)
-    G.add_edges_from(contains_edges)
-    G.add_edges_from([(p, h) for p, h in tagged_edges])
-    G.add_edges_from(member_edges)
-    G.add_edges_from(sent_edges)
-    G.add_edges_from(has_media_post_edges)
-    G.add_edges_from(has_media_msg_edges)
-    G.add_edges_from(received_edges)
-    G.add_edges_from([(nid, tid) for nid, tid, _ in about_edges])
+    def add_edge(a: str, b: str) -> None:
+        adjacency.setdefault(a, set()).add(b)
+        adjacency.setdefault(b, set()).add(a)
 
-    if not nx.is_connected(G):
-        components = nx.number_connected_components(G)
-        print(f"  WARNING: graph has {components} components, adding bridges...")
-        comps = list(nx.connected_components(G))
-        for i in range(len(comps) - 1):
-            node_a = next(iter(comps[i] & set(user_ids)) or iter(comps[i]))
-            node_b = next(iter(comps[i + 1] & set(user_ids)) or iter(comps[i + 1]))
-            G.add_edge(node_a, node_b)
-            follows_edges.append((node_a, node_b))
-        return nx.is_connected(G)
+    for edge_group in (
+        follows_edges,
+        posted_edges,
+        commented_edges,
+        contains_edges,
+        tagged_edges,
+        member_edges,
+        sent_edges,
+        has_media_post_edges,
+        has_media_msg_edges,
+        received_edges,
+    ):
+        for a, b in edge_group:
+            add_edge(a, b)
+
+    for nid, target_id, _target_type in about_edges:
+        add_edge(nid, target_id)
+
+    if not adjacency:
+        return False
+
+    start = next(iter(adjacency))
+    visited = {start}
+    stack = [start]
+    while stack:
+        current = stack.pop()
+        for neighbor in adjacency[current]:
+            if neighbor not in visited:
+                visited.add(neighbor)
+                stack.append(neighbor)
+
+    if len(visited) != len(adjacency):
+        print(f"  WARNING: graph has disconnected nodes: {len(adjacency) - len(visited)}")
+        return False
     return True
 
 

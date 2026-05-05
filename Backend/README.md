@@ -94,7 +94,7 @@ curl -X POST http://localhost:5000/api/gds/communities -H "Content-Type: applica
 | Criterio | Endpoint |
 |---|---|
 | Crear nodo 1 label | `POST /api/nodes` con `labels:["Hashtag"]` |
-| Crear nodo 2+ labels | `POST /api/nodes` con varias labels validas |
+| Crear nodo 2+ labels | `POST /api/nodes` con `labels:["User","Notification"]` y propiedades de ambas labels |
 | Crear nodo con 5+ propiedades | `POST /api/nodes` con payload completo |
 | Visualizar 1 nodo | `GET /api/nodes/User/u_1` |
 | Visualizar muchos nodos | `GET /api/nodes?label=Post&limit=10` |

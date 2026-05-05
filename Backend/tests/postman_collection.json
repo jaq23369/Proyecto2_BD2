@@ -48,6 +48,18 @@
           }
         },
         {
+          "name": "Crear Nodo 2+ Labels",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/nodes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"labels\":[\"User\",\"Notification\"],\"properties\":{\"userId\":\"demo-multilabel-phase3\",\"notificationId\":\"demo-notif-multilabel-phase3\",\"username\":\"demo_multilabel\",\"email\":\"demo_multilabel@example.com\",\"bio\":\"demo\",\"profilePicUrl\":\"\",\"isVerified\":false,\"followersCount\":0,\"followingCount\":0,\"interests\":[\"neo4j\"],\"birthDate\":\"2000-01-01\",\"createdAt\":\"2026-05-05\",\"type\":\"system\",\"isRead\":false,\"priority\":\"medium\",\"message\":\"Nodo con dos labels para la rubrica\"}}"
+            }
+          }
+        },
+        {
           "name": "Visualizar 1 Nodo",
           "request": { "method": "GET", "url": "{{baseUrl}}/api/nodes/User/u_1" }
         },

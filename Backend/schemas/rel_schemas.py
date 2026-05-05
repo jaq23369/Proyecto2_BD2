@@ -24,6 +24,13 @@ class CreateRelPayload(BaseModel):
             raise ValueError(f"Unknown relationship type: '{v}'")
         return v
 
+    @field_validator("properties")
+    @classmethod
+    def validate_min_properties(cls, v: dict) -> dict:
+        if len(v) < 3:
+            raise ValueError("relationship creation requires at least 3 properties")
+        return v
+
 
 class UpdateRelPropsPayload(BaseModel):
     properties: dict

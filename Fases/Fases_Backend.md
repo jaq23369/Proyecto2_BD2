@@ -41,7 +41,7 @@ Dejar el esqueleto del backend funcionando: Flask arranca, conecta a AuraDB, los
 
 ### Tareas
 - [ ] Crear estructura `Backend/` según [Plan_backed.md:29-68](../Diseño/Plan_backed.md#L29-L68)
-- [ ] [Backend/requirements.txt](../Backend/requirements.txt) con flask, flask-cors, neo4j 5.23, pydantic v2, faker, pandas, networkx, pytest
+- [ ] [Backend/requirements.txt](../Backend/requirements.txt) con flask, flask-cors, neo4j 5.x, pydantic v2, faker, pandas y pytest
 - [ ] [Backend/.env.example](../Backend/.env.example) con las 6 variables del plan
 - [ ] [Backend/.gitignore](../Backend/.gitignore) excluyendo `.env`, `seed/data/`, `__pycache__`, `.venv`
 - [ ] [Backend/config.py](../Backend/config.py) cargando `.env` con clase `Settings`
@@ -55,7 +55,7 @@ Dejar el esqueleto del backend funcionando: Flask arranca, conecta a AuraDB, los
 - [ ] [Backend/app.py](../Backend/app.py) con `create_app()`, CORS, blueprints registrados (vacíos por ahora), `/api/health` que pingea Neo4j, y comando CLI `flask init-db`
 - [ ] AuraDB Free creada, credenciales en `.env` real (no commiteado)
 - [ ] [Backend/seed/generate_csvs.py](../Backend/seed/generate_csvs.py) genera los 24 CSVs (8 nodos + 16 relaciones) con Faker
-- [ ] Validación `networkx.is_connected` corre sobre los CSVs y reporta `True`
+- [ ] Validación local de conexidad corre sobre los CSVs y reporta `True`
 
 ### Criterios de "listo" (binarios, todos deben cumplirse)
 1. `pip install -r requirements.txt` instala sin errores en venv limpio.
@@ -81,7 +81,7 @@ Dejar el esqueleto del backend funcionando: Flask arranca, conecta a AuraDB, los
 - `db/neo4j_client.py` con singleton driver conectado a AuraDB Free, helpers `run_read`/`run_write`, cierre automático con `atexit`
 - `db/schema.py` con whitelist completa de labels, tipos de relación y propiedades derivada literalmente del diseño; `utils/cypher_builder.py` que valida contra esa whitelist antes de cualquier interpolación en Cypher
 - `app.py` con `create_app()`, CORS, `/api/health` verificado en vivo contra AuraDB (responde `{"ok":true,"data":{"neo4j":"up"}}`), y comando `flask init-db` que ejecuta los 10 statements de `constraints.cypher`
-- `seed/generate_csvs.py` genera 6720 nodos en 24 CSVs (8 nodos + 16 relaciones) con Faker; valida grafo conexo con networkx (`is_connected = True`) en ~1 segundo
+- `seed/generate_csvs.py` genera 6720 nodos en 24 CSVs (8 nodos + 16 relaciones) con Faker; valida grafo conexo con BFS local (`is_connected = True`) en ~1 segundo
 
 **Qué quedó fuera de alcance (si aplica):**
 - Los CSVs están en `seed/data/` (gitignore); la carga a AuraDB es tarea de Fase 2 (Joel)
@@ -346,13 +346,13 @@ Cerrar los puntos de rúbrica restantes (consultas demo, GDS extra, tests, docum
 | 4-6 consultas Cypher | 15 | `GET /api/queries/*` (6 consultas, 2 por integrante) | 15 |
 | Carga CSV nodos+rel | 5 | `POST /api/ingest/seed`, `POST /api/ingest/csv` | 5 |
 | Datos previos cargados | 2 | `GET /api/ingest/status` muestra 6720 nodos segun Fase 2 | 2 |
-| 5000+ nodos / conexo | 3 | Seed de 6720 nodos + validacion `networkx.is_connected=True` segun Fase 1/2 | 3 |
+| 5000+ nodos / conexo | 3 | Seed de 6720 nodos + validacion local `is_connected=True` segun Fase 1/2 | 3 |
 | GDS (extra) | 10 | `POST /api/gds/pagerank`, `/node-similarity`, `/communities` listos; falta validar en sandbox real | 7 |
 | **Total** | **90 + 10 extra** | Base completa + GDS implementado a falta de sandbox real | **90 + 7 extra** |
 
 **Resultados de tests:**
-- Tests totales: 30
-- Pass: 30 · Fail: 0
+- Tests totales: 36
+- Pass: 36 · Fail: 0
 - Cobertura: no medida con coverage.py; pruebas HTTP cubren nodos, relaciones, queries, GDS y registro de rutas
 
 **Resultado GDS (sandbox):**
@@ -371,6 +371,8 @@ Cerrar los puntos de rúbrica restantes (consultas demo, GDS extra, tests, docum
 - Se agrego `Backend/tests/postman_collection.json` con carpeta "Demo".
 - Se actualizaron dependencias a rangos compatibles con Python 3.14 manteniendo Flask 3, Neo4j 5, Pydantic v2, pandas 2 y pytest.
 - Se reforzo validacion de propiedades dinamicas en `node_service.py` para filtros, agregaciones y removals.
+- Se agrego coercion de tipos para que CSV/API guarden Boolean, Integer, Float, List y Date reales en Neo4j.
+- Se reemplazo la dependencia de `networkx` en el generador por una validacion BFS local de conexidad compatible con Python 3.14.
 
 **Bloqueos / problemas en la presentación:**
 - PDF y video deben generarse manualmente con capturas reales.

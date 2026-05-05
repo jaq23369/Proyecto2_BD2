@@ -1,6 +1,11 @@
 from db.neo4j_client import run_read, run_write
 from db.schema import ID_PROPERTY
-from utils.cypher_builder import validate_label, validate_rel_type, validate_rel_props
+from utils.cypher_builder import (
+    validate_label,
+    validate_rel_type,
+    validate_rel_props,
+    coerce_rel_props,
+)
 from utils.errors import NotFoundError, Neo4jServiceError
 
 
@@ -18,6 +23,7 @@ def create_relationship(
     validate_rel_type(rel_type)
     if properties:
         validate_rel_props(rel_type, properties)
+        properties = coerce_rel_props(rel_type, properties)
     from_id_prop = _id_prop(from_label)
     to_id_prop = _id_prop(to_label)
     cypher = (
@@ -39,6 +45,7 @@ def get_relationships(rel_type: str, skip: int = 0, limit: int = 20, filters: di
     where_parts = []
     if filters:
         validate_rel_props(rel_type, filters)
+        filters = coerce_rel_props(rel_type, filters)
         for k, v in filters.items():
             params[f"f_{k}"] = v
             where_parts.append(f"r.{k} = $f_{k}")
@@ -54,6 +61,7 @@ def get_relationships(rel_type: str, skip: int = 0, limit: int = 20, filters: di
 def update_rel_props(rel_id: str, properties: dict) -> dict:
     rel_type = _get_rel_type(rel_id)
     validate_rel_props(rel_type, properties)
+    properties = coerce_rel_props(rel_type, properties)
     cypher = (
         "MATCH ()-[r]->() WHERE elementId(r) = $rel_id "
         "SET r += $props "
@@ -99,6 +107,7 @@ def delete_relationships(rel_type: str, filters: dict | None = None) -> int:
     where_parts = []
     if filters:
         validate_rel_props(rel_type, filters)
+        filters = coerce_rel_props(rel_type, filters)
         for k, v in filters.items():
             params[f"f_{k}"] = v
             where_parts.append(f"r.{k} = $f_{k}")

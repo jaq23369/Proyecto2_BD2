@@ -2,6 +2,9 @@ from db.neo4j_client import run_read, run_write
 from db.schema import ID_PROPERTY, LABEL_PROPERTIES
 from utils.cypher_builder import (
     validate_label, validate_node_props,
+    validate_node_props_for_labels,
+    coerce_node_props,
+    coerce_node_props_for_labels,
     build_labels_str, build_remove_clause,
 )
 from utils.errors import NotFoundError, Neo4jServiceError, InvalidLabelError
@@ -14,7 +17,8 @@ def _id_prop(label: str) -> str:
 def create_node(labels: list[str], properties: dict) -> dict:
     labels_str = build_labels_str(labels)
     if properties:
-        validate_node_props(labels[0], properties)
+        validate_node_props_for_labels(labels, properties)
+        properties = coerce_node_props_for_labels(labels, properties)
     cypher = f"CREATE (n{labels_str} $props) RETURN n"
     rows = run_write(cypher, {"props": properties})
     if not rows:
@@ -38,6 +42,7 @@ def get_nodes(label: str, skip: int = 0, limit: int = 20, filters: dict | None =
     where_parts = []
     if filters:
         validate_node_props(label, filters)
+        filters = coerce_node_props(label, filters)
         for k, v in filters.items():
             params[f"f_{k}"] = v
             where_parts.append(f"n.{k} = $f_{k}")
@@ -61,6 +66,7 @@ def aggregate_nodes(label: str, group_by: str) -> list[dict]:
 def update_node_props(label: str, node_id: str, properties: dict) -> dict:
     validate_label(label)
     validate_node_props(label, properties)
+    properties = coerce_node_props(label, properties)
     id_prop = _id_prop(label)
     cypher = f"MATCH (n:{label} {{{id_prop}: $id}}) SET n += $props RETURN n"
     rows = run_write(cypher, {"id": node_id, "props": properties})
@@ -75,9 +81,10 @@ def bulk_update_node_props(items: list[dict]) -> list[dict]:
         label = item["label"]
         validate_label(label)
         validate_node_props(label, item["properties"])
+        properties = coerce_node_props(label, item["properties"])
         id_prop = _id_prop(label)
         cypher = f"MATCH (n:{label} {{{id_prop}: $id}}) SET n += $props RETURN n"
-        rows = run_write(cypher, {"id": item["id"], "props": item["properties"]})
+        rows = run_write(cypher, {"id": item["id"], "props": properties})
         if rows:
             results.append(rows[0]["n"])
     return results
