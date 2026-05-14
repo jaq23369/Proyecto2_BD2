@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     aura_instancename: str = ""
     flask_debug: bool = False
     port: int = 5000
-    cors_origins: str = "http://localhost:5173,http://localhost:3000"
+    cors_origins: str = "http://localhost:5173,http://localhost:5174,http://localhost:3000"
     max_csv_size_mb: int = 50
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")

@@ -61,7 +61,7 @@ def list_users():
     skip = int(request.args.get("skip", 0))
     limit = int(request.args.get("limit", 20))
     rows = run_read(
-        "MATCH (n:User) RETURN n SKIP $skip LIMIT $limit",
+        "MATCH (n:User) RETURN n ORDER BY n.createdAt DESC SKIP $skip LIMIT $limit",
         {"skip": skip, "limit": limit},
     )
     return ok([r["n"] for r in rows])

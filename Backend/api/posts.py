@@ -109,24 +109,42 @@ def like_post(post_id):
     data = request.get_json(force=True) or {}
     user_id = data.get("userId", "")
     now = date.today().isoformat()
-    run_write(
+    rows = run_write(
         "MATCH (u:User {userId: $uid}), (p:Post {postId: $pid}) "
         "MERGE (u)-[r:LIKED]->(p) "
-        "ON CREATE SET r.likedAt = $now, r.reactionType = 'like', r.isActive = true",
+        "ON CREATE SET r.likedAt = $now, r.reactionType = 'like', r.isActive = true, "
+        "  p.likesCount = coalesce(p.likesCount, 0) + 1 "
+        "RETURN p.likesCount AS likesCount",
         {"uid": user_id, "pid": post_id, "now": now},
     )
-    return ok({"liked": post_id})
+    likes_count = rows[0]["likesCount"] if rows else 0
+    return ok({"liked": post_id, "likesCount": likes_count})
 
 
 @posts_bp.delete("/<post_id>/like")
 def unlike_post(post_id):
     data = request.get_json(force=True) or {}
     user_id = data.get("userId", "")
-    run_write(
-        "MATCH (u:User {userId: $uid})-[r:LIKED]->(p:Post {postId: $pid}) DELETE r",
+    rows = run_write(
+        "MATCH (u:User {userId: $uid})-[r:LIKED]->(p:Post {postId: $pid}) "
+        "DELETE r "
+        "SET p.likesCount = CASE WHEN coalesce(p.likesCount, 0) > 0 "
+        "  THEN p.likesCount - 1 ELSE 0 END "
+        "RETURN p.likesCount AS likesCount",
         {"uid": user_id, "pid": post_id},
     )
-    return ok({"unliked": post_id})
+    likes_count = rows[0]["likesCount"] if rows else 0
+    return ok({"unliked": post_id, "likesCount": likes_count})
+
+
+@posts_bp.get("/<post_id>/liked-by/<user_id>")
+def check_liked(post_id, user_id):
+    rows = run_read(
+        "OPTIONAL MATCH (u:User {userId: $uid})-[r:LIKED]->(p:Post {postId: $pid}) "
+        "RETURN r IS NOT NULL AS liked",
+        {"uid": user_id, "pid": post_id},
+    )
+    return ok({"liked": rows[0]["liked"] if rows else False})
 
 
 @posts_bp.get("/<post_id>/comments")
@@ -176,6 +194,39 @@ def share_post(post_id, group_id):
         {"pid": post_id, "gid": group_id, "now": now},
     )
     return ok({"shared_in": group_id})
+
+
+@posts_bp.get("/<post_id>/author")
+def get_author(post_id):
+    rows = run_read(
+        "MATCH (u:User)-[:POSTED]->(p:Post {postId: $pid}) RETURN u",
+        {"pid": post_id},
+    )
+    if not rows:
+        return ok(None)
+    return ok(rows[0]["u"])
+
+
+@posts_bp.get("/feed-with-authors/<user_id>")
+def feed_with_authors(user_id):
+    limit = int(request.args.get("limit", 20))
+    rows = run_read(
+        "MATCH (u:User {userId: $uid})-[:FOLLOWS]->(f:User)-[:POSTED]->(p:Post) "
+        "RETURN p, f AS author ORDER BY p.createdAt DESC LIMIT $limit",
+        {"uid": user_id, "limit": limit},
+    )
+    return ok([{"post": r["p"], "author": r["author"]} for r in rows])
+
+
+@posts_bp.get("/recent-with-authors")
+def recent_with_authors():
+    limit = int(request.args.get("limit", 20))
+    rows = run_read(
+        "MATCH (u:User)-[:POSTED]->(p:Post) "
+        "RETURN p, u AS author ORDER BY p.createdAt DESC LIMIT $limit",
+        {"limit": limit},
+    )
+    return ok([{"post": r["p"], "author": r["author"]} for r in rows])
 
 
 @posts_bp.get("/<post_id>/media")

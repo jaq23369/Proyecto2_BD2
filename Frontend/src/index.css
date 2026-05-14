@@ -1,0 +1,138 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-ig-bg text-ig-text font-sans antialiased;
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(225, 48, 108, 0.08), transparent 60%),
+    radial-gradient(900px 500px at -10% 30%, rgba(0, 149, 246, 0.06), transparent 60%),
+    #000;
+  font-feature-settings: "ss01", "cv11";
+}
+
+/* Light theme override */
+html.light body {
+  @apply bg-white text-neutral-900;
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(225, 48, 108, 0.07), transparent 60%),
+    radial-gradient(900px 500px at -10% 30%, rgba(0, 149, 246, 0.05), transparent 60%),
+    #fafafa;
+}
+
+html.light .ig-card { @apply bg-white border-neutral-200; }
+html.light .ig-surface { @apply bg-neutral-50; }
+html.light .ig-border { @apply border-neutral-200; }
+html.light .ig-text-soft { @apply text-neutral-500; }
+html.light .ig-text-dim { @apply text-neutral-400; }
+html.light .ig-input { @apply bg-white border-neutral-200 text-neutral-900 placeholder:text-neutral-400; }
+html.light .ig-pill { @apply bg-neutral-100 border-neutral-200 text-neutral-700; }
+html.light .ig-nav-link { @apply text-neutral-700 hover:bg-neutral-100; }
+html.light .ig-nav-active { @apply bg-neutral-100 text-neutral-900; }
+html.light .ig-mono-block { @apply bg-neutral-50 border-neutral-200 text-neutral-800; }
+
+::selection {
+  background: rgba(225, 48, 108, 0.35);
+  color: #fff;
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #262626; border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: #3a3a3a; }
+
+@layer components {
+  .ig-card {
+    @apply bg-ig-card border border-ig-border rounded-2xl;
+  }
+  .ig-surface {
+    @apply bg-ig-surface;
+  }
+  .ig-border {
+    @apply border-ig-border;
+  }
+  .ig-text-soft { @apply text-ig-textSoft; }
+  .ig-text-dim { @apply text-ig-textDim; }
+
+  .ig-input {
+    @apply bg-ig-elevated border border-ig-border rounded-xl px-3.5 py-2 text-sm
+           text-ig-text placeholder:text-ig-textDim
+           focus:outline-none focus:ring-2 focus:ring-ig-link/40 focus:border-ig-link/60
+           transition;
+  }
+
+  .ig-btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold
+           transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .ig-btn-primary {
+    @apply ig-btn bg-ig-link text-white hover:bg-[#1aa3ff];
+  }
+  .ig-btn-accent {
+    @apply ig-btn bg-ig-gradient text-white shadow-glow hover:opacity-95;
+  }
+  .ig-btn-ghost {
+    @apply ig-btn bg-transparent border border-ig-border text-ig-text hover:bg-ig-elevated;
+  }
+  .ig-btn-danger {
+    @apply ig-btn bg-ig-danger/15 text-ig-danger border border-ig-danger/30 hover:bg-ig-danger/25;
+  }
+  .ig-btn-sm { @apply px-3 py-1.5 text-xs; }
+
+  .ig-pill {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium
+           bg-ig-elevated border border-ig-border text-ig-textSoft;
+  }
+
+  .ig-nav-link {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+           text-ig-textSoft hover:bg-ig-elevated hover:text-ig-text transition;
+  }
+  .ig-nav-active {
+    @apply bg-ig-elevated text-ig-text;
+  }
+
+  .ig-mono-block {
+    @apply font-mono text-[12px] leading-relaxed bg-ig-bg border border-ig-border
+           rounded-xl p-4 overflow-auto max-h-[420px] text-ig-textSoft;
+  }
+
+  .ig-tab {
+    @apply px-4 py-2 text-sm font-semibold rounded-lg text-ig-textSoft hover:text-ig-text transition;
+  }
+  .ig-tab-active {
+    @apply bg-ig-elevated text-ig-text;
+  }
+
+  .ig-section-title {
+    @apply text-xs font-semibold uppercase tracking-[0.14em] text-ig-textDim;
+  }
+
+  .ig-grad-text {
+    background: linear-gradient(90deg, #f09433, #dc2743, #bc1888);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.dot {
+  width: 8px; height: 8px; border-radius: 999px; display: inline-block;
+}

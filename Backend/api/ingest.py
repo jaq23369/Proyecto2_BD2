@@ -70,14 +70,38 @@ def run_seed():
 
 @ingest_bp.get("/status")
 def status():
-    rows = run_read(
+    label_rows = run_read(
         "MATCH (n) "
         "WITH labels(n) AS lbls, count(*) AS cnt "
         "RETURN lbls[0] AS label, cnt "
         "ORDER BY cnt DESC"
     )
-    total = sum(r["cnt"] for r in rows)
-    return ok({"total": total, "by_label": rows})
+    type_rows = run_read(
+        "MATCH ()-[r]->() "
+        "RETURN type(r) AS type, count(*) AS cnt "
+        "ORDER BY cnt DESC"
+    )
+
+    by_label: dict[str, int] = {}
+    for row in label_rows:
+        lbl = row.get("label")
+        if not lbl:
+            continue
+        by_label[lbl] = by_label.get(lbl, 0) + row["cnt"]
+
+    by_type = {row["type"]: row["cnt"] for row in type_rows if row.get("type")}
+
+    total_nodes = sum(by_label.values())
+    total_rels = sum(by_type.values())
+
+    return ok({
+        "totals": {"nodes": total_nodes, "relationships": total_rels},
+        "byLabel": by_label,
+        "byType": by_type,
+        # legacy keys, mantenidos por compatibilidad con el visor raw
+        "total": total_nodes,
+        "by_label": label_rows,
+    })
 
 
 # ── Internal loader (shared with seed/load_to_aura.py) ───────────────────────
