@@ -84,7 +84,7 @@ export default function Sidebar() {
             className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs ig-text-dim uppercase tracking-wider hover:text-ig-text"
           >
             {adminOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-            Admin / Rúbrica
+            Admin
           </button>
           {adminOpen && (
             <div className="space-y-0.5 mt-1">
